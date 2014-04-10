@@ -1,12 +1,14 @@
-from pyengineio_parser import encode_packet, decode_packet, encode_payload, decode_payload
+import binascii
+from pyengineio_parser import encode_packet, decode_packet, encode_payload, decode_payload, encode_binary_payload, \
+    decode_binary_payload
 
 
-def gen_string(size=5):
-    return ''.join([chr(x) for x in range(size)])
+def gen_string(size=5, start=0):
+    return ''.join([chr(x) for x in range(start, start + size)])
 
 
-def gen_bytearray(size=5):
-    return bytearray(gen_string(size))
+def gen_bytearray(size=5, start=0):
+    return bytearray(gen_string(size, start))
 
 
 def test_message_string():
@@ -51,3 +53,25 @@ def test_payload_string_bytearray():
 
     print 'decoded_packets:', decoded_packets
     assert decoded_packets == packets
+
+
+def test_payload_binary():
+    packets = [
+        {'type': 'message', 'data': gen_bytearray()},
+        {'type': 'message', 'data': gen_bytearray(start=5, size=4)}
+    ]
+
+    encoded = encode_binary_payload(packets, lambda encoded: encoded)
+    assert encoded == '\x00\x01\x00\xffb4AAECAwQ=\x00\x01\x00\xffb4BQYHCA=='
+
+    decoded_packets = []
+
+    def decode_callback(packet, index, total):
+        decoded_packets.append(packet)
+
+    decode_binary_payload(encoded, decode_callback)
+
+    print 'decoded_packets:', decoded_packets
+    assert decoded_packets == packets
+
+    assert False

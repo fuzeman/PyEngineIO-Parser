@@ -1,4 +1,4 @@
-from pyengineio_parser.util import try_convert
+from pyengineio_parser.util import try_convert, byte_length
 from base64 import b64encode, b64decode
 
 # Current protocol version
@@ -218,7 +218,32 @@ def encode_binary_payload(packets, callback):
     :return: encoded payload
     :rtype: buffer
     """
-    raise NotImplementedError()
+    if not packets:
+        return callback(bytearray())
+
+    def encode_one(p):
+        def encode_callback(packet):
+            result = bytearray()
+
+            if isinstance(packet, basestring):
+                encoding_length = str(byte_length(packet))
+                result.append(0)  # is a string (not true binary = 0)
+            else:
+                encoding_length = str(len(packet))
+                result.append(1)  # is binary (true binary = 1)
+
+            # size
+            for x in xrange(len(encoding_length)):
+                result.append(int(encoding_length[x]))
+
+            result.append(255)
+
+            result.extend(bytearray(packet))
+            return result
+
+        return encode_packet(p, encode_callback)
+
+    return callback(bytearray().join(map(encode_one, packets)))
 
 
 def decode_binary_payload(data, callback, binary_type=None):
