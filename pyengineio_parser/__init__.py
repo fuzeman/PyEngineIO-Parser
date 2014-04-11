@@ -247,4 +247,35 @@ def encode_binary_payload(packets, callback):
 
 
 def decode_binary_payload(data, callback, binary_type=None):
-    raise NotImplementedError()
+    buf = data
+    messages = []
+
+    while len(buf) > 0:
+        msg_len = ''
+        is_string = buf[0] == 0
+
+        # Read length until separator byte
+        x = 1
+        while buf[x] != 255:
+            msg_len += str(buf[x])
+            x += 1
+
+        # Remove message length from data buffer
+        buf = buf[len(msg_len) + 1:]
+
+        # Parse message length
+        msg_len = int(msg_len)
+
+        # Retrieve message
+        msg = buf[1:msg_len + 1]
+        if is_string:
+            msg = str(msg)
+
+        messages.append(msg)
+        buf = buf[msg_len + 1:]
+
+    # Decode packets and fire callback
+    total = len(messages)
+
+    for x, message in enumerate(messages):
+        callback(decode_packet(message, binary_type), x, total)
