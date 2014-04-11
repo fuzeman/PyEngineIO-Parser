@@ -156,7 +156,7 @@ def decode_payload(data, callback, binary_type=None):
     :param callback: callback method
     :type callback: function
     """
-    if not isinstance(data, basestring):
+    if data and not isinstance(data, basestring):
         return decode_binary_payload(data, callback, binary_type)
 
     print repr(data)

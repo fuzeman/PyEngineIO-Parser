@@ -140,3 +140,17 @@ def test_payload_binary_string():
 
     # Ensure decoded packets match original
     assert decoded_packets == packets
+
+
+def test_blank_data():
+    # String encoding
+    encoded = encode_payload([{'type': 'ping', 'data': None}], lambda encoded: encoded, False)
+    assert encoded == '1:2'
+
+    assert encoded == encode_payload([{'type': 'ping'}], lambda encoded: encoded, False)
+
+    # Binary encoding
+    encoded = encode_payload([{'type': 'ping', 'data': None}], lambda encoded: encoded, True)
+    assert encoded == '\x00\x01\xff\x32'
+
+    assert encoded == encode_payload([{'type': 'ping'}], lambda encoded: encoded, True)
