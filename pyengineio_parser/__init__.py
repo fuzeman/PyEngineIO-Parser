@@ -105,7 +105,7 @@ def decode_packet(data, binary_type=None):
 
         return {'type': PACKET_MAP[packet_type], 'data': data[1:]}
 
-    raise NotImplementedError()
+    raise ValueError('Parameter "data" has an unknown type, expecting str or bytearray')
 
 
 def decode_base64_packet(msg, binary_type):
