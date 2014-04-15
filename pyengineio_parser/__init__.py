@@ -1,4 +1,5 @@
 from pyengineio_parser.util import try_convert, byte_length
+
 from base64 import b64encode, b64decode
 
 # Current protocol version
