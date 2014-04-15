@@ -238,7 +238,7 @@ def encode_binary_payload(packets, callback):
             result.extend(bytearray(packet))
             return result
 
-        return encode_packet(p, encode_callback)
+        return encode_packet(p, encode_callback, True)
 
     return callback(bytearray().join(map(encode_one, packets)))
 
