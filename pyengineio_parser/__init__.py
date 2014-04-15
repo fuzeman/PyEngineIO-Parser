@@ -159,8 +159,6 @@ def decode_payload(data, callback, binary_type=None):
     if data and not isinstance(data, basestring):
         return decode_binary_payload(data, callback, binary_type)
 
-    print repr(data)
-
     if not data:
         # parser error - ignoring payload
         return callback(ERR, 0, 1)
@@ -184,7 +182,6 @@ def decode_payload(data, callback, binary_type=None):
             return callback(ERR, 0, 1)
 
         msg = data[x + 1:x + 1 + length]
-        print repr(msg)
 
         if len(msg) != length:
             # parser error - ignoring payload
