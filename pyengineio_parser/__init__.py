@@ -82,11 +82,11 @@ def decode_packet(data, binary_type=None):
         return ERR
 
     # String decoding
-    if isinstance(data, basestring):
+    if isinstance(data, (str, unicode)):
         packet_type = data[0]
 
         if packet_type == 'b':
-            return decode_base64_packet(data[1:], binary_type)
+            return decode_base64_packet(data[1:])
 
         packet_type = try_convert(packet_type, int)
 
@@ -109,7 +109,7 @@ def decode_packet(data, binary_type=None):
     raise ValueError('Parameter "data" has an unknown type, expecting str or bytearray')
 
 
-def decode_base64_packet(msg, binary_type):
+def decode_base64_packet(msg):
     """Decodes a packet encoded in a base64 string.
 
     :param msg: base64 encoded message
@@ -157,7 +157,7 @@ def decode_payload(data, callback, binary_type=None):
     :param callback: callback method
     :type callback: function
     """
-    if data and not isinstance(data, basestring):
+    if data and not isinstance(data, (str, unicode)):
         return decode_binary_payload(data, callback, binary_type)
 
     if not data:
@@ -223,7 +223,7 @@ def encode_binary_payload(packets, callback):
         def encode_callback(packet):
             result = bytearray()
 
-            if isinstance(packet, basestring):
+            if isinstance(packet, (str, unicode)):
                 encoding_length = str(byte_length(packet))
                 result.append(0)  # is a string (not true binary = 0)
             else:

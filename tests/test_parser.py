@@ -65,24 +65,30 @@ def test_payload_binary():
         {'type': 'message', 'data': second}
     ]
 
-    encoded = encode_binary_payload(packets, lambda encoded: encoded)
+    actual = encode_binary_payload(packets, lambda encoded: encoded)
+    print 'actual  :', repr(actual)
 
     # Validate encoded data
-    assert encoded == ''.join([
+    expected = bytearray().join([
         # {'type': 'message', 'data': gen_bytearray()}
         # ----------------------------------------------------
-        '\x00\x01\x00',         # length = 10
+        '\x01'                  # true-binary
+        '\x06',                 # length = 6
         '\xff',                 # separator
-        'b4',                   # type = binary message
-        b64encode(first),       # data (in binary)
+        '\x04',                 # type = binary message
+        first,                  # data (in binary)
 
         # {'type': 'message', 'data': gen_bytearray(start=5, size=4)}
         # ----------------------------------------------------
-        '\x00\x01\x00',         # length = 10
+        '\x01'                  # true-binary
+        '\x05',                 # length = 5
         '\xff',                 # separator
-        'b4',                   # type = binary message
-        b64encode(second)       # data (in binary)
+        '\x04',                 # type = binary message
+        second                  # data (in binary)
     ])
+    print 'expected:', repr(expected)
+
+    assert actual == expected
 
     # Decode into packets again
     decoded_packets = []
@@ -90,7 +96,7 @@ def test_payload_binary():
     def decode_callback(packet, index, total):
         decoded_packets.append(packet)
 
-    decode_binary_payload(encoded, decode_callback)
+    decode_binary_payload(actual, decode_callback)
 
     # Ensure decoded packets match original
     assert decoded_packets == packets
@@ -105,30 +111,37 @@ def test_payload_binary_string():
         {'type': 'close'}
     ]
 
-    encoded = encode_binary_payload(packets, lambda encoded: encoded)
+    actual = encode_binary_payload(packets, lambda encoded: encoded)
+    print 'actual  :', repr(actual)
 
     # Validate encoded data
-    assert encoded == ''.join([
+    expected = bytearray().join([
         # {'type': 'message', 'data': gen_bytearray(123)}
         # ----------------------------------------------------
-        '\x00\x01\x06\x06',     # length = 166 bytes
+        '\x01'                  # true-binary
+        '\x01\x02\x04',         # length = 124 bytes
         '\xff',                 # separator
-        'b4',                   # type = binary message
-        b64encode(first),       # data (in binary)
+        '\x04',                 # type = binary message
+        first,                  # data (in binary)
 
         # {'type': 'message', 'data': 'hello'}
         # ----------------------------------------------------
-        '\x00\x06',             # length = 6 bytes
+        '\x00'                  # not true-binary
+        '\x06',                 # length = 6 bytes
         '\xff',                 # separator
         '4',                    # type = message
         'hello',                # data
 
         # {'type': 'close'}
         # ----------------------------------------------------
-        '\x00\x01',             # length = 1 byte
+        '\x00'                  # not true-binary
+        '\x01',                 # length = 1 byte
         '\xff',                 # separator
         '1',                    # type = close
     ])
+    print 'expected:', repr(expected)
+
+    assert expected == actual
 
     # Decode into packets again
     decoded_packets = []
@@ -136,7 +149,7 @@ def test_payload_binary_string():
     def decode_callback(packet, index, total):
         decoded_packets.append(packet)
 
-    decode_binary_payload(encoded, decode_callback)
+    decode_binary_payload(actual, decode_callback)
 
     # Ensure decoded packets match original
     assert decoded_packets == packets
