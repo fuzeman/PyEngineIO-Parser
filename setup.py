@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='PyEngineIO-Parser',
-    version='1.0.4-beta',
+    version='1.0.5-beta',
     url='http://github.com/fuzeman/PyEngineIO-Parser/',
 
     author='Dean Gardiner',

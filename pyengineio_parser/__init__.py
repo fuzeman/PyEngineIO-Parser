@@ -72,7 +72,7 @@ def encode_base64_packet(packet, callback):
     return callback(message)
 
 
-def decode_packet(data, binary_type=None):
+def decode_packet(data):
     """Decodes a packet. Data also available as an ArrayBuffer if requested.
 
     :return: packet, has `type` and `data`
@@ -82,11 +82,11 @@ def decode_packet(data, binary_type=None):
         return ERR
 
     # String decoding
-    if isinstance(data, basestring):
+    if isinstance(data, (str, unicode)):
         packet_type = data[0]
 
         if packet_type == 'b':
-            return decode_base64_packet(data[1:], binary_type)
+            return decode_base64_packet(data[1:])
 
         packet_type = try_convert(packet_type, int)
 
@@ -109,7 +109,7 @@ def decode_packet(data, binary_type=None):
     raise ValueError('Parameter "data" has an unknown type, expecting str or bytearray')
 
 
-def decode_base64_packet(msg, binary_type):
+def decode_base64_packet(msg):
     """Decodes a packet encoded in a base64 string.
 
     :param msg: base64 encoded message
@@ -147,7 +147,7 @@ def encode_payload(packets, callback, supports_binary=False):
     return callback(''.join(map(encode_one, packets)))
 
 
-def decode_payload(data, callback, binary_type=None):
+def decode_payload(data, callback):
     """Decodes data when a payload is maybe expected. Possible binary contents are
        decoded from their base64 representation
 
@@ -157,8 +157,8 @@ def decode_payload(data, callback, binary_type=None):
     :param callback: callback method
     :type callback: function
     """
-    if data and not isinstance(data, basestring):
-        return decode_binary_payload(data, callback, binary_type)
+    if data and not isinstance(data, (str, unicode)):
+        return decode_binary_payload(data, callback)
 
     if not data:
         # parser error - ignoring payload
@@ -189,7 +189,7 @@ def decode_payload(data, callback, binary_type=None):
             return callback(ERR, 0, 1)
 
         if len(msg):
-            packet = decode_packet(msg, binary_type)
+            packet = decode_packet(msg)
 
             if packet == ERR:
                 # parser error in individual packet - ignoring payload
@@ -223,7 +223,7 @@ def encode_binary_payload(packets, callback):
         def encode_callback(packet):
             result = bytearray()
 
-            if isinstance(packet, basestring):
+            if isinstance(packet, (str, unicode)):
                 encoding_length = str(byte_length(packet))
                 result.append(0)  # is a string (not true binary = 0)
             else:
@@ -244,7 +244,7 @@ def encode_binary_payload(packets, callback):
     return callback(bytearray().join(map(encode_one, packets)))
 
 
-def decode_binary_payload(data, callback, binary_type=None):
+def decode_binary_payload(data, callback):
     buf = data
     messages = []
 
@@ -276,4 +276,4 @@ def decode_binary_payload(data, callback, binary_type=None):
     total = len(messages)
 
     for x, message in enumerate(messages):
-        callback(decode_packet(message, binary_type), x, total)
+        callback(decode_packet(message), x, total)
